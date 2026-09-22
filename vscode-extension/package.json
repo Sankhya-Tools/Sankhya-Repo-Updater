@@ -2,7 +2,7 @@
   "name": "sankhya-repo-updater",
   "displayName": "Sankhya Repo Updater",
   "description": "Atualiza os repositorios Sankhya sozinho ao abrir o VS Code, conectando a VPN automaticamente se precisar.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "publisher": "sankhya-internal",
   "engines": {
     "vscode": "^1.80.0"

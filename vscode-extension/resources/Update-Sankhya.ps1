@@ -219,7 +219,10 @@ function Connect-SankhyaVpn {
     # Conectar mirado bem colado na borda de baixo (429,474, no proprio limite
     # limite medido ~474) - centro (462) e ate 470 ainda erraram por cima em
     # popups que renderizam maiores em outras maquinas. Repete o processo
-    # inteiro ate MaxAttempts vezes se a 1a tentativa completa falhar.
+    # inteiro ate MaxAttempts vezes se a 1a tentativa completa falhar - 2-3
+    # tentativas costumam bastar, mas subiu pra 6 (~3min no pior caso) pra
+    # cobrir dias em que o FortiClient/SSO demora mais, sem ficar ilimitado
+    # (evita travar pra sempre se a VPN estiver mesmo fora do ar).
     param(
         [string]$GitHostName,
         [double]$HomeXRatio = (675.0 / 877.0),
@@ -228,7 +231,7 @@ function Connect-SankhyaVpn {
         [double]$ConnectYRatio = (474.0 / 675.0),
         [int]$WaitForWindowSeconds = 10,
         [int]$WaitForConnectSeconds = 25,
-        [int]$MaxAttempts = 2
+        [int]$MaxAttempts = 6
     )
 
     if (-not ("SankhyaVpnWin32" -as [type])) {
@@ -252,7 +255,7 @@ public class SankhyaVpnWin32 {
 
     for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
         [Console]::Error.WriteLine("[vpn] tentativa $attempt de $MaxAttempts")
-        if ($attempt -gt 1) { Start-Sleep -Seconds 2 }
+        if ($attempt -gt 1) { Start-Sleep -Seconds 3 }
 
         $proc = Get-Process | Where-Object { $_.MainWindowTitle -like "FortiClient*" } | Select-Object -First 1
         if (-not $proc) {

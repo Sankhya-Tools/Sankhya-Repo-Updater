@@ -213,7 +213,7 @@ function Connect-SankhyaVpn {
         [double]$ConnectYRatio = (474.0 / 675.0),
         [int]$WaitForWindowSeconds = 10,
         [int]$WaitForConnectSeconds = 25,
-        [int]$MaxAttempts = 2
+        [int]$MaxAttempts = 6
     )
 
     if (-not ("SankhyaVpnWin32" -as [type])) {
@@ -239,9 +239,13 @@ public class SankhyaVpnWin32 {
     # selecionar a conta do Google se aparecer) fica numa "tentativa" que pode
     # ser repetida. Se a 1a tentativa completa falhar (ex: demorou mais que o
     # esperado, ou a autenticacao nao fechou a tempo), tenta tudo de novo do
-    # zero ate MaxAttempts vezes, em vez de desistir na primeira.
+    # zero ate MaxAttempts vezes, em vez de desistir na primeira. Na pratica
+    # 2-3 tentativas costumam bastar, mas subiu pra 6 (~3min no pior caso) pra
+    # cobrir dias em que o FortiClient/SSO demora mais - nao e ilimitado de
+    # proposito, pra nao travar pra sempre numa maquina onde a VPN realmente
+    # esta fora do ar.
     for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
-        if ($attempt -gt 1) { Start-Sleep -Seconds 2 }
+        if ($attempt -gt 1) { Start-Sleep -Seconds 3 }
 
         $proc = Get-Process | Where-Object { $_.MainWindowTitle -like "FortiClient*" } | Select-Object -First 1
         if (-not $proc) {
