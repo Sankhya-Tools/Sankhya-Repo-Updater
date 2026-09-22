@@ -1,833 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sankhya Repo Updater</title>
 <style>
   :root {
-    --bg: #f5f7f5;
-    --surface: #ffffff;
-    --surface-2: #eef1ee;
-    --border: #dde3de;
-    --text: #16211c;
-    --text-muted: #5b675f;
-    --text-faint: #8b978f;
-    --accent: #0e7c6b;
-    --accent-strong: #0b6357;
-    --accent-soft: #e2f2ee;
-    --accent-contrast: #ffffff;
-    --good: #2f7d4f;
-    --good-soft: #e6f3ea;
-    --warn: #a9631b;
-    --warn-soft: #f7ecdd;
-    --danger: #b23a34;
-    --danger-soft: #f8e8e6;
-    --rail: #cfd9d4;
-    --shadow: 0 1px 2px rgba(20, 30, 25, 0.04), 0 8px 24px rgba(20, 30, 25, 0.06);
-
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Segoe UI Variable", ui-sans-serif, "Helvetica Neue", Arial, sans-serif;
-    --mono: ui-monospace, "Cascadia Code", "Cascadia Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+    --bg: #0a0a0a;
+    --card: #141414;
+    --border: #2a2a2a;
+    --text: #e8e8e8;
+    --muted: #a3a3a3;
+    --accent: #2dd4bf;
+    --accent-dim: rgba(45, 212, 191, 0.12);
+    --code-bg: #1f1f1f;
   }
-
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #0f1513;
-      --surface: #161d1a;
-      --surface-2: #1c2420;
-      --border: #2a332d;
-      --text: #e8ede9;
-      --text-muted: #a3ada5;
-      --text-faint: #6f7a72;
-      --accent: #3ecdb0;
-      --accent-strong: #6adcc4;
-      --accent-soft: #16332c;
-      --accent-contrast: #08211b;
-      --good: #64c48a;
-      --good-soft: #16301f;
-      --warn: #e3a75a;
-      --warn-soft: #352712;
-      --danger: #e58a83;
-      --danger-soft: #391f1c;
-      --rail: #2c3733;
-      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
-    }
-  }
-
-  :root[data-theme="dark"] {
-    --bg: #0f1513;
-    --surface: #161d1a;
-    --surface-2: #1c2420;
-    --border: #2a332d;
-    --text: #e8ede9;
-    --text-muted: #a3ada5;
-    --text-faint: #6f7a72;
-    --accent: #3ecdb0;
-    --accent-strong: #6adcc4;
-    --accent-soft: #16332c;
-    --accent-contrast: #08211b;
-    --good: #64c48a;
-    --good-soft: #16301f;
-    --warn: #e3a75a;
-    --warn-soft: #352712;
-    --danger: #e58a83;
-    --danger-soft: #391f1c;
-    --rail: #2c3733;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
-  }
-
   * { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    padding: 0;
-  }
-
   body {
+    margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: var(--sans);
-    line-height: 1.65;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
   }
-
-  .page {
-    max-width: 780px;
-    margin: 0 auto;
-    padding: 56px 24px 96px;
-  }
-
-  header.hero {
-    margin-bottom: 48px;
-  }
-
-  .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-family: var(--mono);
-    font-size: 12.5px;
+  .wrap { max-width: 760px; margin: 0 auto; padding: 56px 24px 96px; }
+  .badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
     letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--accent-strong);
-    background: var(--accent-soft);
-    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-    padding: 5px 10px;
-    border-radius: 100px;
-    margin-bottom: 18px;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(45, 212, 191, 0.35);
+    border-radius: 999px;
+    padding: 6px 14px;
+    margin-bottom: 20px;
   }
-
-  h1 {
-    font-size: clamp(32px, 4.4vw, 44px);
-    line-height: 1.08;
-    letter-spacing: -0.02em;
-    font-weight: 800;
-    margin: 0 0 14px;
-    text-wrap: balance;
-  }
-
-  .lede {
-    font-size: 18px;
-    color: var(--text-muted);
-    max-width: 62ch;
-    margin: 0 0 28px;
-  }
-
-  .lede code, p code, li code {
-    background: var(--surface-2);
+  h1 { font-size: 40px; margin: 0 0 20px; letter-spacing: -0.01em; }
+  h2 { font-size: 24px; margin: 48px 0 16px; letter-spacing: -0.01em; }
+  p { color: var(--text); margin: 0 0 16px; }
+  .lead { color: var(--muted); font-size: 17px; }
+  code {
+    background: var(--code-bg);
     border: 1px solid var(--border);
     border-radius: 5px;
-    padding: 0.1em 0.4em;
-    font-family: var(--mono);
-    font-size: 0.88em;
-    color: var(--text);
+    padding: 2px 6px;
+    font-family: "SF Mono", Consolas, Monaco, monospace;
+    font-size: 0.9em;
+    color: #d1d5db;
   }
-
-  .download-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    background: var(--accent);
-    color: var(--accent-contrast);
-    font-weight: 700;
-    font-size: 14.5px;
-    text-decoration: none;
-    padding: 11px 18px;
-    border-radius: 10px;
-    margin-bottom: 28px;
-    box-shadow: var(--shadow);
-    transition: filter 0.15s ease, transform 0.15s ease;
-  }
-
-  .download-cta:hover {
-    filter: brightness(1.08);
-    transform: translateY(-1px);
-  }
-
-  .haves {
-    display: grid;
-    gap: 10px;
-    padding: 20px 22px;
-    background: var(--surface);
+  .card {
+    background: var(--card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    box-shadow: var(--shadow);
+    padding: 24px 28px;
+    margin: 20px 0;
   }
-
-  .haves .item {
-    display: grid;
-    grid-template-columns: 20px 1fr;
+  .checklist { list-style: none; margin: 0; padding: 0; }
+  .checklist li {
+    display: flex;
     gap: 12px;
-    align-items: start;
-    font-size: 15px;
+    padding: 10px 0;
   }
-
-  .haves .item svg {
-    width: 18px;
-    height: 18px;
-    margin-top: 2px;
-    flex-shrink: 0;
+  .checklist li::before {
+    content: "✓";
     color: var(--accent);
+    font-weight: 700;
+    flex-shrink: 0;
   }
-
-  .haves .item .muted {
-    color: var(--text-muted);
-  }
-
-  section {
-    margin-top: 56px;
-  }
-
-  h2 {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    margin: 0 0 6px;
-    text-wrap: balance;
-  }
-
-  .section-sub {
-    color: var(--text-muted);
-    font-size: 15px;
-    margin: 0 0 24px;
-    max-width: 62ch;
-  }
-
-  ul.plain, ol.plain {
-    margin: 0;
+  ul.plain, ol.steps { padding-left: 0; margin: 0 0 16px; list-style: none; }
+  ul.plain li {
+    position: relative;
     padding-left: 20px;
-    color: var(--text);
+    margin-bottom: 10px;
   }
-
-  ul.plain li, ol.plain li {
-    margin-bottom: 8px;
+  ul.plain li::before {
+    content: "•";
+    position: absolute;
+    left: 4px;
+    color: var(--muted);
   }
-
-  /* ---- step rail ---- */
-  .track {
+  ol.steps { counter-reset: step; }
+  ol.steps li {
+    counter-increment: step;
     position: relative;
+    padding-left: 44px;
+    margin-bottom: 22px;
   }
-
-  .track-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    margin-bottom: 18px;
-    color: var(--text);
-  }
-
-  .track-label.primary { color: var(--accent-strong); }
-
-  .badge-pill {
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 3px 9px;
-    border-radius: 100px;
-    font-weight: 700;
-  }
-
-  .badge-pill.rec {
-    background: var(--accent-soft);
-    color: var(--accent-strong);
-    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-  }
-
-  .badge-pill.alt {
-    background: var(--surface-2);
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-  }
-
-  .steps {
-    display: grid;
-    gap: 0;
-  }
-
-  .step {
-    position: relative;
-    display: grid;
-    grid-template-columns: 40px 1fr;
-    gap: 18px;
-    padding-bottom: 28px;
-  }
-
-  .step:last-child { padding-bottom: 4px; }
-
-  .step-num {
-    position: relative;
-    width: 40px;
-    height: 40px;
+  ol.steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    background: var(--surface);
-    border: 2px solid var(--accent);
-    color: var(--accent-strong);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--mono);
-    font-weight: 700;
-    font-size: 15px;
-    z-index: 1;
-    flex-shrink: 0;
   }
-
-  .track.alt .step-num {
-    border-color: var(--rail);
-    color: var(--text-muted);
-  }
-
-  .step:not(:last-child) .step-num::after {
-    content: "";
-    position: absolute;
-    top: 40px;
-    left: 50%;
-    width: 2px;
-    height: calc(100% + 28px - 40px);
-    background: var(--rail);
-    transform: translateX(-50%);
-  }
-
-  .step-body h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin: 6px 0 6px;
-  }
-
-  .step-body p {
-    margin: 0 0 10px;
-    color: var(--text-muted);
+  ol.steps li strong { color: var(--text); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
     font-size: 15px;
   }
-
-  .step-body p:last-child { margin-bottom: 0; }
-
-  pre {
-    background: #10241f;
-    color: #d9f2eb;
-    border-radius: 10px;
-    padding: 14px 16px;
-    overflow-x: auto;
-    font-family: var(--mono);
-    font-size: 13.5px;
-    line-height: 1.55;
-    margin: 10px 0;
-    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  }
-
-  :root[data-theme="dark"] pre,
-  :root:not([data-theme="light"]) pre {
-    background: #081712;
-  }
-
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) pre { background: #10241f; }
-  }
-
-  .note {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
+  th, td {
+    text-align: left;
     padding: 12px 14px;
-    font-size: 13.5px;
-    color: var(--text-muted);
-    margin-top: 10px;
-  }
-
-  .note strong { color: var(--text); }
-
-  /* ---- security cards ---- */
-  .sec-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  @media (max-width: 620px) {
-    .sec-grid { grid-template-columns: 1fr; }
-  }
-
-  .sec-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px;
-    border-top: 3px solid var(--good);
-    box-shadow: var(--shadow);
-  }
-
-  .sec-card.risk { border-top-color: var(--danger); }
-
-  .sec-card .tag {
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 100px;
-    display: inline-block;
-    margin-bottom: 10px;
-  }
-
-  .sec-card .tag.good { background: var(--good-soft); color: var(--good); }
-  .sec-card .tag.risk { background: var(--danger-soft); color: var(--danger); }
-
-  .sec-card h3 {
-    font-family: var(--mono);
-    font-size: 17px;
-    margin: 0 0 8px;
-  }
-
-  .sec-card p {
-    font-size: 14.5px;
-    color: var(--text-muted);
-    margin: 0;
-  }
-
-  /* ---- vpn auto card ---- */
-  .vpn-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 22px 24px;
-    box-shadow: var(--shadow);
-  }
-
-  .vpn-card-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px 14px;
-    margin-bottom: 12px;
-  }
-
-  .vpn-card-head code {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    padding: 0.15em 0.5em;
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--accent-strong);
-  }
-
-  .vpn-card .tag.alt {
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 100px;
-    background: var(--surface-2);
-    color: var(--text-faint);
-    border: 1px solid var(--border);
-  }
-
-  .vpn-card > p {
-    font-size: 14.5px;
-    color: var(--text-muted);
-    margin: 0 0 16px;
-  }
-
-  .vpn-reqs {
-    display: grid;
-    gap: 8px;
-    padding: 14px 16px;
-    background: var(--surface-2);
-    border-radius: 10px;
-    margin-bottom: 14px;
-  }
-
-  .vpn-req {
-    display: grid;
-    grid-template-columns: 18px 1fr;
-    gap: 10px;
-    align-items: start;
-    font-size: 14px;
-  }
-
-  .vpn-req svg {
-    width: 16px;
-    height: 16px;
-    margin-top: 2px;
-    color: var(--accent);
-    flex-shrink: 0;
-  }
-
-  .vpn-fallback {
-    font-size: 13.5px;
-    color: var(--text-faint);
-    margin: 0;
-  }
-
-  /* ---- faq ---- */
-  .faq {
-    display: grid;
-    gap: 10px;
-  }
-
-  details {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 4px 16px;
-  }
-
-  details[open] { padding-bottom: 12px; }
-
-  summary {
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 14.5px;
-    padding: 14px 0;
-    list-style: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  summary::-webkit-details-marker { display: none; }
-
-  summary::after {
-    content: "+";
-    font-family: var(--mono);
-    font-weight: 400;
-    color: var(--text-faint);
-    font-size: 18px;
-    flex-shrink: 0;
-    transition: transform 0.15s ease;
-  }
-
-  details[open] summary::after {
-    transform: rotate(45deg);
-  }
-
-  details p {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 14.5px;
-  }
-
-  /* ---- file structure ---- */
-  .files {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-  }
-
-  .files .row {
-    display: grid;
-    grid-template-columns: minmax(150px, 220px) 1fr;
-    gap: 16px;
-    padding: 11px 18px;
-    font-size: 13.5px;
     border-bottom: 1px solid var(--border);
   }
-
-  .files .row:last-child { border-bottom: none; }
-
-  .files .row.head {
-    background: var(--surface-2);
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
+  th {
+    color: var(--muted);
+    font-size: 12px;
     letter-spacing: 0.05em;
-    color: var(--text-faint);
-    font-weight: 700;
+    text-transform: uppercase;
+    font-weight: 600;
   }
-
-  .files .row code {
-    font-family: var(--mono);
-    color: var(--accent-strong);
-  }
-
-  .files .row span {
-    color: var(--text-muted);
-  }
-
-  footer {
-    margin-top: 64px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
+  hr { border: none; border-top: 1px solid var(--border); margin: 48px 0 24px; }
+  .footer { color: var(--muted); font-size: 13px; text-align: center; }
+  a { color: var(--accent); }
+  .btn {
+    display: inline-flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    font-size: 13px;
-    color: var(--text-faint);
-    font-family: var(--mono);
-  }
-
-  a { color: var(--accent-strong); }
-
-  ::selection {
+    gap: 10px;
     background: var(--accent);
-    color: var(--accent-contrast);
+    color: #062420;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 14px 20px;
+    border-radius: 10px;
+    margin: 4px 0 28px;
   }
-
-  :focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+  .btn:hover { filter: brightness(1.05); }
 </style>
+</head>
+<body>
+<div class="wrap">
 
-<div class="page">
+  <span class="badge">⟳ GUIA DE INSTALAÇÃO</span>
+  <h1>Sankhya Repo Updater</h1>
+  <p class="lead">Um pacote que verifica sozinho, todo dia, se os módulos Sankhya têm versão nova e atualiza sem ninguém precisar lembrar ou pedir. Esta versão se configura sozinha, não precisa editar nenhum arquivo.</p>
 
-  <header class="hero">
-    <span class="eyebrow">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
-      Guia de instalação
-    </span>
-    <h1>Sankhya Repo Updater</h1>
-    <p class="lede">Um pacote que verifica sozinho, todo dia, se os módulos Sankhya têm versão nova — e atualiza sem ninguém precisar lembrar ou pedir. Esta versão se configura sozinha: não precisa editar nenhum arquivo, nem pedir ajuda pra ninguém, nem lidar com <code>.ps1</code> — é tudo <code>.bat</code>.</p>
+  <a class="btn" href="https://drive.google.com/drive/folders/1eLTy76RPVhwBDwewOYfTvcU7Ci5V57yb?usp=drive_link">⬇ Baixar sankhya-repo-updater-template.zip</a>
 
-    <a class="download-cta" href="https://drive.google.com/drive/folders/1eLTy76RPVhwBDwewOYfTvcU7Ci5V57yb?usp=drive_link" target="_blank" rel="noopener">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-      Baixar sankhya-repo-updater-template.zip
-    </a>
-
-    <div class="haves">
-      <div class="item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-        <span>Descobre sozinho quais repositórios Sankhya existem no computador — não precisa informar caminho de nada</span>
-      </div>
-      <div class="item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-        <span>Uma tarefa agendada roda 1x por dia sozinha, testando a VPN antes de tentar qualquer coisa</span>
-      </div>
-      <div class="item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-        <span><code>git pull --ff-only</code> em cada repositório — só avança quando é fast-forward, nunca força merge</span>
-      </div>
-      <div class="item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-        <span>Um atalho na área de trabalho pra rodar na hora, quando quiser (ex: assim que conectar a VPN de manhã)</span>
-      </div>
-      <div class="item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-        <span class="muted">Log de cada execução e aviso na tela quando algo for atualizado, guardado ou der erro</span>
-      </div>
-    </div>
-  </header>
-
-  <section id="antes">
-    <h2>Antes de começar</h2>
-    <ul class="plain">
-      <li>Windows com PowerShell (já vem instalado) e Git</li>
-      <li>Os repositórios que você quer manter atualizados já clonados (<code>git clone</code>) em algum lugar do computador</li>
-      <li>VPN da Sankhya (FortiClient) configurada e funcionando</li>
-      <li><strong>FortiClient fixado na barra de tarefas</strong> (clique direito no ícone dele → "Fixar na barra de tarefas") — só é obrigatório se for usar a VPN automática opcional abaixo</li>
-      <li>O arquivo <code>sankhya-repo-updater-template.zip</code> — <a href="https://drive.google.com/drive/folders/1eLTy76RPVhwBDwewOYfTvcU7Ci5V57yb?usp=drive_link" target="_blank" rel="noopener">baixe aqui no Drive</a></li>
+  <h2>Recursos</h2>
+  <div class="card">
+    <ul class="checklist">
+      <li>Descobre sozinho quais repositórios Sankhya existem no computador — não precisa informar caminho de nada</li>
+      <li>Uma tarefa agendada roda 1x por dia, testando a VPN antes de tentar qualquer coisa</li>
+      <li>Um atalho na área de trabalho pra rodar na hora, quando quiser (ex: assim que conectar a VPN de manhã)</li>
+      <li>Log de cada execução e aviso na tela quando algo for atualizado ou der erro</li>
     </ul>
-  </section>
+  </div>
 
-  <section id="auto">
-    <div class="track">
-      <span class="track-label primary">
-        Caminho rápido
-        <span class="badge-pill rec">recomendado</span>
-      </span>
-      <h2>Instalação automática</h2>
-      <p class="section-sub">Você não edita nada. O instalador varre o computador, encontra os repositórios sozinho e já deixa tudo funcionando.</p>
+  <h2>Antes de começar</h2>
+  <ul class="plain">
+    <li>Windows com PowerShell (já vem instalado) e Git</li>
+    <li>Os repositórios que você quer manter atualizados já clonados (<code>git clone</code>) em algum lugar do computador</li>
+    <li>VPN da Sankhya (FortiClient) configurada e funcionando</li>
+    <li>FortiClient fixado na barra de tarefas (clique direito no ícone dele → "Fixar na barra de tarefas") — só é obrigatório se for usar a VPN automática opcional</li>
+    <li>O arquivo <code>sankhya-repo-updater-template.zip</code> — baixe <a href="https://drive.google.com/drive/folders/1eLTy76RPVhwBDwewOYfTvcU7Ci5V57yb?usp=drive_link">aqui no Drive</a></li>
+  </ul>
 
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-body">
-            <h3>Extraia o pacote</h3>
-            <p>Baixe o <code>sankhya-repo-updater-template.zip</code> <a href="https://drive.google.com/drive/folders/1eLTy76RPVhwBDwewOYfTvcU7Ci5V57yb?usp=drive_link" target="_blank" rel="noopener">no Drive</a> e descompacte em qualquer pasta — não precisa ser dentro da pasta dos projetos.</p>
-          </div>
-        </div>
+  <h2>Instalação automática</h2>
+  <p>Caminho rápido: você não edita nada. O instalador varre o computador, encontra os repositórios sozinho e já deixa tudo funcionando.</p>
+  <ol class="steps">
+    <li><strong>Extraia o pacote</strong>: Baixe o <code>sankhya-repo-updater-template.zip</code> <a href="https://drive.google.com/drive/folders/1eLTy76RPVhwBDwewOYfTvcU7Ci5V57yb?usp=drive_link">no Drive</a> e descompacte em qualquer pasta (não precisa ser dentro da pasta dos projetos).</li>
+    <li><strong>Dê 2 cliques em <code>Instalar-Automatico.bat</code></strong>. Uma janela preta de console abre, mostra o progresso, e ao final aparece uma caixa de mensagem com o resultado. Aperte qualquer tecla pra fechar o console quando terminar. O script procura pastas com repositório git cujo remoto aponte para <code>gitlab.sankhya.com.br</code>. Pode levar 1–2 minutos na primeira vez.</li>
+    <li><strong>Confira o resumo</strong>: Uma janela mostra quais repositórios foram encontrados e configurados, o horário da checagem diária e o nome do atalho criado na área de trabalho.</li>
+  </ol>
 
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-body">
-            <h3>Dê 2 cliques em <code>Instalar-Automatico.bat</code></h3>
-            <p>Uma janela preta de console abre, mostra o progresso, e ao final aparece uma caixa de mensagem com o resultado. Aperte qualquer tecla pra fechar o console quando terminar.</p>
-            <div class="note">
-              <span>ℹ</span>
-              <span>Não tem nenhum arquivo <code>.ps1</code> nesta pasta — todo o pacote é só <code>.bat</code>, que roda normalmente com clique duplo, sem abrir editor de texto nem exigir configuração extra do PowerShell.</span>
-            </div>
-            <p>O script procura pastas com repositório git cujo remoto aponte para <code>gitlab.sankhya.com.br</code>. Pode levar 1–2 minutos na primeira vez.</p>
-          </div>
-        </div>
+  <h2>No dia a dia</h2>
+  <p>Todo dia, no horário padrão das 11h, a automação atualiza os projetos sozinha. Se a VPN não estiver conectada nesse momento, a automação faz a conexão primeiro e, em seguida, segue com a atualização normalmente.</p>
+  <p>Se por algum motivo a automação for interrompida e não conseguir concluir o processo, dá pra rodar na mão pelo atalho <strong>Atualizar Módulos</strong> da área de trabalho — o clique manual nele inicia o mesmo processo padrão.</p>
 
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-body">
-            <h3>Confira o resumo</h3>
-            <p>Uma janela mostra quais repositórios foram encontrados e configurados, o horário da checagem diária e o nome do atalho criado na área de trabalho. Pronto — nada mais a fazer.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <h2>VPN automática (opcional)</h2>
+  <p>Por padrão, se a VPN cair, o pacote só abre o FortiClient e espera você clicar em "Conectar". Ative <code>"vpnAutoConnect": true</code> no <code>config.json</code> pra ele clicar sozinho (opcional, vem desligado).</p>
+  <p>Com isso ligado, o pacote conecta a VPN sozinho sempre que ela cair — no atalho manual e na tarefa agendada.</p>
+  <p>Ele só faz isso se:</p>
+  <ul class="plain">
+    <li>FortiClient fixado na barra de tarefas</li>
+    <li>Sessão SSO já autenticada no navegador</li>
+  </ul>
+  <p>Faltando um dos dois, tudo volta ao normal: abre a janela e avisa, sem quebrar nada.</p>
 
-  <section id="manual">
-    <div class="track alt">
-      <span class="track-label">
-        Caminho alternativo
-        <span class="badge-pill alt">controle manual</span>
-      </span>
-      <h2>Instalação manual</h2>
-      <p class="section-sub">Só use esta via se quiser escolher exatamente quais pastas entram, em vez de deixar o instalador descobrir sozinho.</p>
+  <h2>Desinstalar</h2>
+  <p>Dê 2 cliques em <code>uninstall.bat</code>. Remove a tarefa agendada e o atalho da área de trabalho (os logs ficam, se quiser apagar é manual).</p>
 
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-body">
-            <h3>Edite o <code>config.json</code></h3>
-            <p>Preencha <code>reposRoot</code> (pasta que contém os repositórios) e <code>repoNames</code> (nomes das pastas dentro dela) — ou, se os repositórios estiverem espalhados, preencha <code>repoPaths</code> com uma lista de caminhos completos.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-body">
-            <h3>Rode o instalador manual</h3>
-            <p>Dê 2 cliques em <code>install.bat</code>.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-body">
-            <h3>Habilite caminhos longos, se for avisado</h3>
-            <p>Só necessário se algum repositório tiver arquivos de build com caminho muito comprido. Requer PowerShell como <strong>Administrador</strong>, 1x só:</p>
-            <pre>New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
-  -Name LongPathsEnabled -Value 1 -PropertyType DWord -Force</pre>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <h2>Pacote: sankhya-repo-updater-template</h2>
+  <table>
+    <thead><tr><th>Arquivo</th><th>Função</th></tr></thead>
+    <tbody>
+      <tr><td><code>Instalar-Automatico.bat</code></td><td>instalador sem configuração manual — descobre os repositórios sozinho</td></tr>
+      <tr><td><code>install.bat</code></td><td>instalador manual — usa o <code>config.json</code> preenchido à mão</td></tr>
+      <tr><td><code>uninstall.bat</code></td><td>remove a tarefa agendada e o atalho</td></tr>
+      <tr><td><code>config.json</code></td><td>configuração (gerada sozinha pelo instalador automático, ou editada à mão)</td></tr>
+      <tr><td><code>Atualizar-Agora.bat</code></td><td>o que o atalho da área de trabalho executa (verificação manual, com janela de resultado)</td></tr>
+      <tr><td><code>update-sankhya-modules.bat</code></td><td>o que a tarefa agendada executa sozinha, 1x por dia — não precisa clicar nele</td></tr>
+      <tr><td><code>logs\</code></td><td>histórico de cada execução</td></tr>
+    </tbody>
+  </table>
 
-  <section id="dia-a-dia">
-    <h2>No dia a dia</h2>
-    <p class="section-sub">Antes de mexer em qualquer repositório, o script testa se consegue alcançar o host git configurado. Se a VPN estiver desconectada, por padrão ele não tenta nada e avisa isso especificamente — em vez de um erro genérico, a notificação diz pra conectar a VPN e usar o atalho manual depois (dá pra automatizar até essa parte, veja "VPN automática" abaixo). O histórico de cada execução fica em <code>logs\update-AAAAMM.log</code>, dentro da própria pasta do pacote.</p>
-  </section>
-
-  <section id="seguranca">
-    <h2>Segurança: alterações não commitadas</h2>
-    <p class="section-sub">Quando um repositório tem mudanças que ainda não foram commitadas, o script precisa decidir o que fazer com elas antes de atualizar. Essa escolha é o campo <code>discardMode</code> no <code>config.json</code>.</p>
-
-    <div class="sec-grid">
-      <div class="sec-card">
-        <span class="tag good">padrão do pacote</span>
-        <h3>"stash"</h3>
-        <p>Guarda as mudanças com <code>git stash push -u</code> antes de atualizar. Reversível — recupere depois com <code>git stash pop</code>. Fique aqui se não tiver certeza de qual usar.</p>
-      </div>
-      <div class="sec-card risk">
-        <span class="tag risk">use com cautela</span>
-        <h3>"hard"</h3>
-        <p>Roda <code>git reset --hard</code> + <code>git clean -fd</code>. Apaga qualquer alteração não commitada <strong>para sempre, sem volta</strong>. Só use se tiver certeza de nunca deixar trabalho sem commit nesses repositórios no horário agendado.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="vpn-auto">
-    <h2>VPN automática</h2>
-    <p class="section-sub">Por padrão, quando a VPN está desconectada o pacote só abre a janela do FortiClient e mostra o aviso — você clica em "Conectar" você mesmo. Dá pra ligar um modo em que ele clica sozinho.</p>
-
-    <div class="vpn-card">
-      <div class="vpn-card-head">
-        <span class="tag alt">opcional · desligado por padrão</span>
-        <code>"vpnAutoConnect": true</code>
-      </div>
-      <p>Quando ligado, o pacote abre o FortiClient e clica em "Conectar" sozinho toda vez que a VPN estiver desconectada — no atalho manual e na tarefa agendada. Só completa a conexão se sua sessão SSO já estiver autenticada (o mesmo fluxo sem senha que você já usa); caso contrário, para aí mesmo sem travar nada.</p>
-      <div class="vpn-reqs">
-        <div class="vpn-req">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-          <span>FortiClient <strong>fixado na barra de tarefas</strong></span>
-        </div>
-        <div class="vpn-req">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-          <span>Sessão SSO já autenticada no navegador</span>
-        </div>
-      </div>
-      <p class="vpn-fallback">Se algum dos dois não se aplicar numa execução, ele cai de volta no comportamento padrão (abrir a janela, avisar) — nunca quebra o resto do pacote.</p>
-    </div>
-  </section>
-
-  <section id="faq">
-    <h2>Se algo der errado</h2>
-    <div class="faq">
-      <details>
-        <summary>O antivírus reclamou do <code>.bat</code> usando <code>certutil</code></summary>
-        <p>Os <code>.bat</code> deste pacote usam <code>certutil -decode</code> (ferramenta nativa do Windows) pra reconstruir, num arquivo temporário em <code>%TEMP%</code>, o script que efetivamente roda — e apagam esse arquivo temporário logo depois. É uma técnica válida e comum, mas algum antivírus mais agressivo pode estranhar por padrão. Se acontecer, adicione uma exceção para a pasta do pacote.</p>
-      </details>
-      <details>
-        <summary>Notificação "VPN desconectada"</summary>
-        <p>Normal — o script detectou que não alcança o host git configurado. Conecte a VPN e rode o atalho manual.</p>
-      </details>
-      <details>
-        <summary>"git pull --ff-only falhou (provável divergência)"</summary>
-        <p>Seu branch local e o remoto divergiram (ex: alguém reescreveu histórico). O script não força nada — resolva manualmente com <code>git pull</code> ou <code>git rebase</code> naquele repositório.</p>
-      </details>
-      <details>
-        <summary>"Filename too long" durante a atualização</summary>
-        <p>Limite de caminho do Windows. Aplique o passo de <code>LongPathsEnabled</code> da instalação manual. Até lá, o script só pula aquele repositório naquele dia, sem quebrar nada.</p>
-      </details>
-      <details>
-        <summary>O instalador automático não encontrou nenhum repositório</summary>
-        <p>Confirme que os projetos já foram clonados com <code>git clone</code>, e que o remoto <code>origin</code> deles aponta para o host git configurado (rode <code>git remote -v</code> dentro da pasta do projeto pra conferir). Se o host for outro, abra um "Prompt de Comando" nesta pasta e rode <code>Instalar-Automatico.bat -GitHost "seu.git.host"</code>.</p>
-      </details>
-      <details>
-        <summary>Liguei <code>vpnAutoConnect</code> e o clique não acerta o botão</summary>
-        <p>O cálculo do clique usa a área de conteúdo da janela do FortiClient como referência, então costuma se ajustar sozinho entre resoluções — mas em telas muito fora do padrão ainda pode errar por poucos pixels. Se isso acontecer, desligue <code>vpnAutoConnect</code> de volta pra <code>false</code>: o pacote continua funcionando normalmente, só sem essa parte.</p>
-      </details>
-    </div>
-  </section>
-
-  <section id="desinstalar">
-    <h2>Desinstalar</h2>
-    <p class="section-sub">Dê 2 cliques em <code>uninstall.bat</code>. Remove a tarefa agendada e o atalho da área de trabalho (os logs ficam, se quiser apagar é manual).</p>
-  </section>
-
-  <section id="arquivos">
-    <h2>Pacote: sankhya-repo-updater-template</h2>
-    <div class="files">
-      <div class="row head"><span>arquivo</span><span>função</span></div>
-      <div class="row"><code>Instalar-Automatico.bat</code><span>instalador sem configuração manual — descobre os repositórios sozinho</span></div>
-      <div class="row"><code>install.bat</code><span>instalador manual — usa o <code>config.json</code> preenchido à mão</span></div>
-      <div class="row"><code>uninstall.bat</code><span>remove a tarefa agendada e o atalho</span></div>
-      <div class="row"><code>config.json</code><span>configuração (gerada sozinha pelo instalador automático, ou editada à mão)</span></div>
-      <div class="row"><code>Atualizar-Agora.bat</code><span>o que o atalho da área de trabalho executa (verificação manual, com janela de resultado)</span></div>
-      <div class="row"><code>update-sankhya-modules.bat</code><span>o que a tarefa agendada executa sozinha, 1x por dia — não precisa clicar nele</span></div>
-      <div class="row"><code>logs\</code><span>histórico de cada execução</span></div>
-    </div>
-  </section>
-
-  <footer>
-    <span>sankhya-repo-updater-template</span>
-    <span>git fetch · git pull --ff-only · sem surpresas</span>
-  </footer>
+  <hr>
+  <p class="footer">sankhya-repo-updater-template · git fetch · git pull --ff-only · sem surpresas</p>
 
 </div>
+</body>
+</html>
