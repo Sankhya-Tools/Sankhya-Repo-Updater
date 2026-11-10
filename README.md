@@ -1,147 +1,77 @@
 # Sankhya Repo Updater
 
-Verifica diariamente se ha versoes novas nos repositorios git configurados e atualiza
-automaticamente (`git pull --ff-only`), sem precisar pedir manualmente toda vez.
+Mantem os repositorios git do Sankhya atualizados todos os dias (`git pull --ff-only`), tanto
+os que estao no **GitLab** (`gitlab.sankhya.com.br`, precisa de VPN) quanto os que foram
+migrados para o **GitHub** (`github.com/sankhya-tech`).
 
-Todos os arquivos executaveis deste pacote sao `.bat` - de 2 cliques em qualquer um deles e
-roda direto, sem abrir editor de texto nem pedir configuracao de PowerShell.
+Tudo fica em **um unico arquivo**: `Sankhya-Repo-Updater.bat`. Ele e ao mesmo tempo um `.bat`
+e um script PowerShell legivel - a janela de configuracao, o instalador, a tarefa agendada e o
+atalho manual estao todos dentro dele. Nao precisa editar nada a mao.
 
-## O que isso faz
+## Uso
 
-- 1x por dia (horario configuravel), roda em segundo plano via Tarefa Agendada do Windows:
-  - Testa se consegue alcancar o host git (detecta VPN desconectada antes de tentar qualquer coisa)
-  - Para cada repositorio configurado: `git fetch` e, se houver commits novos no branch atual,
-    `git pull --ff-only` (so avanca se for fast-forward - nunca faz merge/rebase automatico)
-  - Se o repositorio tiver alteracoes locais nao commitadas, aplica o `discardMode` configurado
-    (ver abaixo) antes de atualizar
-  - Loga tudo em `.\logs\update-YYYYMM.log` e mostra uma notificacao (balao do Windows) quando
-    ha algo novo, erro, ou a VPN esta desconectada
-- Um atalho na area de trabalho para rodar a verificacao manualmente a qualquer momento (util
-  logo depois de conectar a VPN), com um resumo em uma janela que fica aberta ate voce fechar
+1. De 2 cliques em `Sankhya-Repo-Updater.bat`. Abre uma janela que:
+   - procura sozinha os modulos na pasta de projetos (padrao `C:\SK-Code`) e ja deixa marcados;
+   - lista tambem os modulos conhecidos que ainda nao existem na maquina (marque para clonar);
+   - reconhece modulos migrados do GitLab para o GitHub e mostra "origin sera trocado".
+2. Ajuste se quiser: **Conectar a VPN automaticamente** (ja vem marcado), horario e o que fazer
+   com alteracoes locais. "Adicionar modulo por URL..." e "Procurar no computador todo" para
+   casos fora do padrao.
+3. Clique em **Salvar e instalar**. Grava o `config.json` (ao lado do `.bat`), cria a tarefa
+   diaria e o atalho na area de trabalho, e oferece atualizar na hora.
 
-## Pre-requisitos
+No primeiro acesso ao GitHub o login abre no navegador e fica salvo (Git Credential Manager).
+A tarefa agendada roda escondida e nunca pede login - sem credencial, so registra no log.
 
-- Windows + PowerShell + git ja instalados
-- Os repositorios que voce quer manter atualizados ja clonados (`git clone`) em algum lugar da
-  maquina
-- Se algum repositorio tiver arquivos com caminho muito longo (ex: pastas de build geradas com
-  nomes profundos), habilite suporte a caminhos longos do Windows 1x, em um PowerShell como
-  **Administrador**:
-  ```powershell
-  New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name LongPathsEnabled -Value 1 -PropertyType DWord -Force
-  ```
-  Sem isso, `git.exe` pode falhar com "Filename too long" ao tentar atualizar esses repositorios
-  - o script trata isso como um erro normal (loga e pula aquele repositorio naquele dia), nao
-  trava nem corrompe nada.
+Para mudar algo depois (incluir/remover modulo, horario, VPN), abra o `.bat` de novo e clique
+em **Salvar e instalar**.
 
-## Como instalar (automatico - recomendado para quem nao quer editar nada)
+Linha de comando: `/agora`, `/agendado`, `/status`, `/instalar`, `/desinstalar`.
 
-1. Extraia esta pasta inteira em qualquer lugar do computador (nao precisa ser dentro da pasta
-   dos projetos).
-2. De 2 cliques em `Instalar-Automatico.bat`.
-   - O script varre os discos fixos do computador procurando pastas com repositorio git cujo
-     remoto `origin` aponte para `gitlab.sankhya.com.br`, monta o `config.json` sozinho com o
-     que encontrar, e ja instala a tarefa agendada e o atalho.
-   - Pode levar 1-2 minutos na primeira vez. Uma janela de console mostra o progresso e, ao
-     final, uma caixa de mensagem lista quais repositorios foram encontrados e configurados.
-     Aperte qualquer tecla para fechar a janela de console quando terminar.
-   - Se os seus repositorios usam outro host git, abra um "Prompt de Comando" nesta pasta e
-     rode:
-     ```
-     Instalar-Automatico.bat -GitHost "seu.git.host"
-     ```
-   - Se nao encontrar nenhum repositorio, verifique se eles ja foram clonados, ou use a
-     instalacao manual abaixo.
+Quando outro modulo migrar para o GitHub, troque a URL dele em `$KnownRepos`, no topo do `.bat`:
+todo mundo que usar o arquivo passa a ter o `origin` trocado sozinho.
 
-## Como instalar (manual - se preferir controlar exatamente quais pastas entram)
+## O que acontece com cada repositorio
 
-1. Extraia esta pasta inteira em qualquer lugar do computador.
-2. Edite `config.json` e preencha:
-   - `reposRoot`: pasta que contem todos os seus repositorios (ex: `C:\\SK-Code`)
-   - `repoNames`: lista dos nomes das pastas dos repositorios (dentro de `reposRoot`)
-   - `gitHost`: host do git usado para testar se a VPN/rede esta ok (ex: `gitlab.sankhya.com.br`)
-   - `scheduleTime`: horario de execucao diaria (formato `HH:mm`) - escolha um horario em que
-     voce normalmente ja esta com a VPN conectada
-   - `discardMode`: **veja a secao de seguranca abaixo antes de mudar isso**
-   - `vpnAutoConnect`: **veja a secao "VPN automatica" abaixo antes de mudar isso**
+- **Pasta nao existe** -> `git clone` da `Url` configurada (com `core.longpaths=true`).
+- **Pasta existe, `origin` aponta para outro servidor** (ex: projeto migrado do GitLab para o
+  GitHub) -> confere se a URL nova responde e so entao troca o `origin`. Se nao responder, o
+  `origin` antigo e mantido e o erro vai para o log.
+- **Ha commits novos no branch atual** -> `git fetch origin --prune` + `git pull --ff-only`
+  (nunca faz merge/rebase). Se o branch local nao existir no novo remoto, o repositorio e
+  pulado e o log avisa.
+- **Alteracoes locais nao commitadas** -> so sao tocadas quando ha algo para puxar, conforme o
+  `DiscardMode`:
+  - `'stash'` (padrao, recomendado): `git stash push -u` - recupera com `git stash pop`.
+  - `'hard'`: `git reset --hard` + `git clean -fd` - **apaga sem volta**. Como a tarefa roda
+    sem supervisao, so use se nunca houver trabalho sem commit nesses repositorios.
 
-   Alternativa: em vez de `reposRoot`/`repoNames`, voce pode preencher `repoPaths` diretamente
-   com uma lista de caminhos completos (util se os repositorios estao espalhados em lugares
-   diferentes). Se `repoPaths` tiver algo, ele tem prioridade sobre `reposRoot`/`repoNames`.
-3. De 2 cliques em `install.bat`. Isso cria a tarefa agendada e o atalho na area de trabalho.
+## Conexao e VPN
 
-## Como desinstalar
+A conexao e testada por servidor. Se a VPN estiver caida, so os repositorios dos servidores
+listados em `VpnHosts` ficam de fora naquele dia; os do GitHub continuam sendo atualizados.
 
-De 2 cliques em `uninstall.bat`.
+Com `VpnAutoConnect = $true`, o script tenta conectar o FortiClient sozinho (clica em
+"Conectar" e escolhe a conta `@sankhya.com.br` no SSO do Google, ate 6 tentativas). Requer o
+FortiClient **fixado na barra de tarefas** e a sessao de SSO ja autenticada. Com `$false`, so
+abre a janela do FortiClient e avisa.
 
-## Seguranca: `discardMode` (importante)
+## Logs
 
-Quando um repositorio tem alteracoes locais nao commitadas, o script precisa decidir o que
-fazer com elas antes de puxar a atualizacao. Ha duas opcoes em `config.json`:
-
-- **`"stash"` (padrao, recomendado)** - roda `git stash push -u`. O repositorio fica limpo e a
-  atualizacao segue normalmente, mas suas alteracoes **nao sao perdidas**: ficam guardadas no
-  stash e podem ser recuperadas depois com `git stash pop` (ou `git stash list` para ver todos).
-- **`"hard"`** - roda `git reset --hard` + `git clean -fd`. O repositorio fica identico ao
-  remoto, mas isso **apaga permanentemente** qualquer alteracao ou arquivo novo nao commitado
-  naquele repositorio, sem possibilidade de recuperacao. So use isso se tiver certeza de que
-  nunca vai ter trabalho em andamento sem commit nesses repositorios no horario agendado - como
-  a tarefa roda todo dia sem supervisao, isso pode destruir trabalho real sem aviso previo no
-  momento em que acontece (o log registra o que foi apagado, mas o conteudo em si nao volta).
-
-Se voce (ou quem for configurar isso) nao tem certeza de qual usar, fique no `"stash"`.
-
-## VPN automatica: `vpnAutoConnect` (opcional)
-
-Por padrao (`"vpnAutoConnect": false`), quando a VPN esta desconectada o pacote so abre a janela
-do FortiClient (se estiver fixado na barra de tarefas) e mostra o aviso normal - a pessoa clica
-em "Conectar" ela mesma.
-
-Se mudar para `"vpnAutoConnect": true`, o pacote tenta conectar sozinho: abre a janela do
-FortiClient e clica em "Conectar" pela pessoa. Isso so funciona se:
-
-- O **FortiClient estiver fixado na barra de tarefas** (clique direito no icone dele -> "Fixar
-  na barra de tarefas", 1x so, manual - nao da pra fixar por script).
-- A sessao de SSO da pessoa ja estiver autenticada (mesmo fluxo que ela usaria manualmente, sem
-  digitar senha) - se a sessao expirou, o clique automatico nao resolve sozinho, e cai de volta
-  no aviso normal.
-
-Se algum desses dois pontos nao se aplicar numa maquina, o auto-connect simplesmente nao
-consegue e cai no comportamento padrao (abrir a janela, avisar) - nao quebra nada.
+`%LOCALAPPDATA%\SankhyaRepoUpdater\logs\update-YYYYMM.log` (botao **Logs** na janela).
 
 ## Se algo der errado
 
-- **Notificacao "VPN desconectada"**: normal - o script detectou que nao alcanca o `gitHost`.
-  Conecte a VPN e rode o atalho manual.
-- **"git pull --ff-only falhou (provavel divergencia)"**: seu branch local e o remoto
-  divergiram (ex: alguem reescreveu historico). O script nao forca nada - resolva manualmente
-  com `git pull` ou `git rebase` naquele repositorio.
-- **"Filename too long" durante a atualizacao**: limite de caminho do Windows. Aplique o passo
-  de `LongPathsEnabled` acima. Ate la, o script so pula aquele repositorio naquele dia, sem
-  quebrar nada.
-- **Instalador automatico nao encontrou nenhum repositorio**: confirme que os projetos ja foram
-  clonados com `git clone`, e que o remoto `origin` deles realmente aponta para o `gitHost`
-  configurado (`git remote -v` dentro da pasta do projeto).
-- **Antivirus reclama do `certutil` sendo usado por um `.bat`**: os `.bat` deste pacote usam
-  `certutil -decode` (ferramenta nativa do Windows) para reconstruir, num arquivo temporario em
-  `%TEMP%`, o script que efetivamente roda - e apagam esse arquivo temporario logo depois. E uma
-  tecnica valida e comum, mas alguns antivirus mais agressivos podem estranhar por padrao. Se
-  isso acontecer, adicione uma excecao para a pasta do pacote.
+- **"git pull --ff-only falhou (provavel divergencia)"**: branch local e remoto divergiram.
+  Resolva manualmente com `git pull`/`git rebase` naquele repositorio.
+- **"sem acesso a https://github.com/..."** na tarefa agendada: falta login no GitHub. Rode o
+  atalho manual 1x.
+- **"Filename too long"**: habilite caminhos longos do Windows (PowerShell como Administrador):
+  ```powershell
+  New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name LongPathsEnabled -Value 1 -PropertyType DWord -Force
+  ```
 
-## Estrutura dos arquivos
+## Editando o arquivo
 
-- `Instalar-Automatico.bat` - **de 2 cliques aqui** para instalar sem configurar nada: descobre
-  os repositorios sozinho e ja instala
-- `install.bat` - instalador manual: usa o `config.json` que voce preencheu (`reposRoot`/
-  `repoNames` ou `repoPaths`)
-- `uninstall.bat` - remove a tarefa agendada e o atalho
-- `config.json` - configuracao (gerada sozinha pelo instalador automatico, ou editada a mao)
-- `Atualizar-Agora.bat` - o que o atalho da area de trabalho executa (verificacao manual, com
-  janela de resultado)
-- `update-sankhya-modules.bat` - o que a tarefa agendada executa sozinha, 1x por dia (nao
-  precisa clicar nele nunca)
-- `logs\` - historico de cada execucao
-
-Nenhum destes arquivos e um `.ps1` solto - a logica de cada um esta embutida dentro do proprio
-`.bat`. Se precisar alterar o comportamento do pacote, peca a fonte legivel (em PowerShell) de
-quem gerou este template - editar o `.bat` diretamente nao e pratico.
+Mantenha o `.bat` so com caracteres ASCII (sem acentos) e com quebras de linha CRLF - o Windows
+PowerShell 5.1 le o arquivo como ANSI e o `cmd` espera CRLF.

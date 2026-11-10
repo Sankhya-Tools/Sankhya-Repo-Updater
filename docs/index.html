@@ -4,18 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sankhya Repo Updater</title>
+<meta name="description" content="Mantém os módulos Sankhya (GitLab e GitHub) atualizados todos os dias, sozinho. Um único arquivo, sem editar nada.">
 <style>
   :root {
     --bg: #0a0a0a;
     --card: #141414;
+    --card-2: #1a1a1a;
     --border: #2a2a2a;
     --text: #e8e8e8;
     --muted: #a3a3a3;
     --accent: #2dd4bf;
     --accent-dim: rgba(45, 212, 191, 0.12);
+    --accent-line: rgba(45, 212, 191, 0.35);
+    --warn: #fbbf24;
+    --warn-dim: rgba(251, 191, 36, 0.10);
     --code-bg: #1f1f1f;
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     margin: 0;
     background: var(--bg);
@@ -23,7 +29,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.6;
   }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 56px 24px 96px; }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 56px 20px 96px; }
   .badge {
     display: inline-block;
     font-size: 12px;
@@ -31,185 +37,341 @@
     letter-spacing: 0.06em;
     color: var(--accent);
     background: var(--accent-dim);
-    border: 1px solid rgba(45, 212, 191, 0.35);
+    border: 1px solid var(--accent-line);
     border-radius: 999px;
     padding: 6px 14px;
     margin-bottom: 20px;
   }
-  h1 { font-size: 40px; margin: 0 0 20px; letter-spacing: -0.01em; }
-  h2 { font-size: 24px; margin: 48px 0 16px; letter-spacing: -0.01em; }
-  p { color: var(--text); margin: 0 0 16px; }
-  .lead { color: var(--muted); font-size: 17px; }
-  code {
+  h1 { font-size: 40px; line-height: 1.15; margin: 0 0 16px; letter-spacing: -0.01em; }
+  h2 { font-size: 24px; margin: 56px 0 16px; letter-spacing: -0.01em; }
+  h3 { font-size: 18px; margin: 0 0 8px; }
+  p { margin: 0 0 14px; }
+  .lead { color: var(--muted); font-size: 17px; max-width: 640px; }
+  .muted { color: var(--muted); }
+  code, kbd {
     background: var(--code-bg);
     border: 1px solid var(--border);
     border-radius: 5px;
-    padding: 2px 6px;
-    font-family: "SF Mono", Consolas, Monaco, monospace;
-    font-size: 0.9em;
+    padding: 1px 6px;
+    font-family: "Cascadia Mono", Consolas, Monaco, monospace;
+    font-size: 0.88em;
     color: #d1d5db;
+    overflow-wrap: anywhere;
   }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px 28px;
-    margin: 20px 0;
-  }
-  .checklist { list-style: none; margin: 0; padding: 0; }
-  .checklist li {
-    display: flex;
-    gap: 12px;
-    padding: 10px 0;
-  }
-  .checklist li::before {
-    content: "✓";
-    color: var(--accent);
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  ul.plain, ol.steps { padding-left: 0; margin: 0 0 16px; list-style: none; }
-  ul.plain li {
-    position: relative;
-    padding-left: 20px;
-    margin-bottom: 10px;
-  }
-  ul.plain li::before {
-    content: "•";
-    position: absolute;
-    left: 4px;
-    color: var(--muted);
-  }
-  ol.steps { counter-reset: step; }
-  ol.steps li {
-    counter-increment: step;
-    position: relative;
-    padding-left: 44px;
-    margin-bottom: 22px;
-  }
-  ol.steps li::before {
-    content: counter(step);
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-weight: 700;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  ol.steps li strong { color: var(--text); }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-    font-size: 15px;
-  }
-  th, td {
-    text-align: left;
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--border);
-  }
-  th {
-    color: var(--muted);
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-  hr { border: none; border-top: 1px solid var(--border); margin: 48px 0 24px; }
-  .footer { color: var(--muted); font-size: 13px; text-align: center; }
+  kbd { border-bottom-width: 2px; font-family: inherit; font-weight: 600; }
   a { color: var(--accent); }
+
+  /* download */
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; margin: 28px 0 8px; }
   .btn {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     background: var(--accent);
     color: #062420;
     font-weight: 700;
+    font-size: 17px;
     text-decoration: none;
-    padding: 14px 20px;
-    border-radius: 10px;
-    margin: 4px 0 28px;
+    padding: 16px 24px;
+    border-radius: 12px;
   }
-  .btn:hover { filter: brightness(1.05); }
+  .btn:hover { filter: brightness(1.07); }
+  .btn svg { width: 22px; height: 22px; flex-shrink: 0; }
+  .btn small { display: block; font-weight: 500; font-size: 12px; opacity: 0.75; }
+  .hero-note { color: var(--muted); font-size: 14px; }
+
+  /* resumo em 4 icones */
+  .glance { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 36px 0 0; }
+  .glance a {
+    display: block; text-decoration: none; color: var(--text);
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px; font-size: 14px; line-height: 1.35;
+  }
+  .glance a:hover { border-color: var(--accent-line); }
+  .glance b { display: block; color: var(--accent); font-size: 13px; margin-bottom: 4px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; margin: 16px 0; }
+  .checklist { list-style: none; margin: 0; padding: 0; }
+  .checklist li { display: flex; gap: 12px; padding: 7px 0; }
+  .checklist li::before { content: "\2713"; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+
+  /* passos */
+  .step { display: grid; grid-template-columns: 44px 1fr; gap: 0 16px; margin: 0 0 8px; }
+  .step-num {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--accent); color: var(--accent);
+    font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+  .step-line { grid-column: 1; justify-self: center; width: 1px; background: var(--border); margin: 6px 0; }
+  .step-body { grid-row: span 2; padding-bottom: 28px; min-width: 0; }
+  .step:last-child .step-line { display: none; }
+
+  .tip, .warn { border-radius: 10px; padding: 12px 16px; margin: 12px 0; font-size: 15px; }
+  .tip { background: var(--accent-dim); border: 1px solid var(--accent-line); }
+  .warn { background: var(--warn-dim); border: 1px solid rgba(251, 191, 36, 0.35); }
+  .warn b { color: var(--warn); }
+  .tip b { color: var(--accent); }
+
+  .copy-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
+  .copy-row code { font-size: 15px; padding: 6px 10px; }
+  .copy-btn {
+    background: var(--card-2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  .copy-btn:hover { border-color: var(--accent-line); }
+
+  /* reproducao da janela */
+  .win {
+    background: #f0f0f0; color: #1a1a1a; border-radius: 8px; overflow: hidden;
+    font-family: "Segoe UI", Tahoma, sans-serif; font-size: 12px; margin: 14px 0 6px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #3a3a3a;
+  }
+  .win-title { background: #fff; padding: 8px 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; }
+  .win-title span:last-child { letter-spacing: 10px; color: #555; }
+  .win-body { padding: 10px 12px 12px; }
+  .win-row { display: flex; gap: 6px; align-items: center; margin: 6px 0; flex-wrap: wrap; }
+  .win-input { background: #fff; border: 1px solid #aaa; padding: 2px 6px; flex: 1; min-width: 120px; }
+  .win-btn { background: #e1e1e1; border: 1px solid #adadad; padding: 3px 10px; white-space: nowrap; }
+  .win-btn.primary { border-color: #0078d4; box-shadow: inset 0 0 0 1px #0078d4; }
+  .win-grid { width: 100%; border-collapse: collapse; background: #fff; margin: 6px 0; border: 1px solid #aaa; }
+  .win-grid th { background: #f5f5f5; font-weight: 400; text-align: left; padding: 3px 6px; border-right: 1px solid #ddd; border-bottom: 1px solid #ccc; font-size: 12px; }
+  .win-grid td { padding: 3px 6px; border-bottom: 1px solid #eee; white-space: nowrap; }
+  .win-grid td:first-child { text-align: center; width: 54px; }
+  .win-scroll { overflow-x: auto; }
+  .s-ok { color: #107c10; } .s-clone { color: #8a5a00; } .s-swap { color: #0063b1; }
+  .win-foot { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+  .win-status { color: #333; }
+  .win-legend { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 14px; margin: 12px 0 0; }
+  .pin {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: #062420;
+    font-size: 11px; font-weight: 800; flex-shrink: 0; font-family: -apple-system, "Segoe UI", sans-serif;
+  }
+  .win .pin { vertical-align: middle; margin-left: 4px; }
+
+  table.t { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 15px; }
+  table.t th, table.t td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.t th { color: var(--muted); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 600; }
+
+  details { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; }
+  details[open] { border-color: var(--accent-line); }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; list-style: none; display: flex; gap: 10px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "+"; color: var(--accent); font-weight: 700; width: 12px; flex-shrink: 0; }
+  details[open] summary::before { content: "\2212"; }
+  details > div { padding: 0 18px 14px 40px; color: var(--text); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 56px 0 24px; }
+  .footer { color: var(--muted); font-size: 13px; text-align: center; }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 32px; }
+    .glance { grid-template-columns: repeat(2, 1fr); }
+    .btn { width: 100%; justify-content: center; }
+    .step { grid-template-columns: 36px 1fr; gap: 0 12px; }
+    .step-num { width: 32px; height: 32px; }
+    details > div { padding-left: 18px; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <span class="badge">⟳ GUIA DE INSTALAÇÃO</span>
+  <span class="badge">&#10227; GUIA DE INSTALA&Ccedil;&Atilde;O</span>
   <h1>Sankhya Repo Updater</h1>
-  <p class="lead">Um pacote que verifica sozinho, todo dia, se os módulos Sankhya têm versão nova e atualiza sem ninguém precisar lembrar ou pedir. Esta versão se configura sozinha, não precisa editar nenhum arquivo.</p>
+  <p class="lead">Mant&eacute;m os m&oacute;dulos Sankhya atualizados todos os dias, sozinho &mdash; tanto os do <strong>GitLab</strong> quanto os que migraram para o <strong>GitHub</strong>. &Eacute; um arquivo s&oacute;, voc&ecirc; configura tudo numa janela e n&atilde;o edita nada.</p>
 
-  <a class="btn" href="https://drive.google.com/drive/folders/1eLTy76RPVhwBDwewOYfTvcU7Ci5V57yb?usp=drive_link">⬇ Baixar sankhya-repo-updater-template.zip</a>
-
-  <h2>Recursos</h2>
-  <div class="card">
-    <ul class="checklist">
-      <li>Descobre sozinho quais repositórios Sankhya existem no computador — não precisa informar caminho de nada</li>
-      <li>Uma tarefa agendada roda 1x por dia, testando a VPN antes de tentar qualquer coisa</li>
-      <li>Um atalho na área de trabalho pra rodar na hora, quando quiser (ex: assim que conectar a VPN de manhã)</li>
-      <li>Log de cada execução e aviso na tela quando algo for atualizado ou der erro</li>
-    </ul>
+  <div class="hero-actions">
+    <a class="btn" href="Sankhya-Repo-Updater.zip" download>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      <span>Baixar Sankhya-Repo-Updater<small>.zip &middot; Windows &middot; 1 arquivo</small></span>
+    </a>
+    <span class="hero-note">Instala em ~2 minutos.<br>J&aacute; usa a vers&atilde;o antiga? <a href="#migrar">Veja aqui</a>.</span>
   </div>
 
-  <h2>Antes de começar</h2>
-  <ul class="plain">
-    <li>Windows com PowerShell (já vem instalado) e Git</li>
-    <li>Os repositórios que você quer manter atualizados já clonados (<code>git clone</code>) em algum lugar do computador</li>
-    <li>VPN da Sankhya (FortiClient) configurada e funcionando</li>
-    <li>FortiClient fixado na barra de tarefas (clique direito no ícone dele → "Fixar na barra de tarefas") — só é obrigatório se for usar a VPN automática opcional</li>
-    <li>O arquivo <code>sankhya-repo-updater-template.zip</code> — baixe <a href="https://drive.google.com/drive/folders/1eLTy76RPVhwBDwewOYfTvcU7Ci5V57yb?usp=drive_link">aqui no Drive</a></li>
-  </ul>
+  <nav class="glance" aria-label="Resumo">
+    <a href="#passo-1"><b>1 &middot; Baixe</b>e extraia numa pasta fixa</a>
+    <a href="#passo-2"><b>2 &middot; Abra</b>2 cliques no <code>.bat</code></a>
+    <a href="#passo-3"><b>3 &middot; Confira</b>os m&oacute;dulos marcados</a>
+    <a href="#passo-4"><b>4 &middot; Instale</b>clique em <em>Salvar e instalar</em></a>
+  </nav>
 
-  <h2>Instalação automática</h2>
-  <p>Caminho rápido: você não edita nada. O instalador varre o computador, encontra os repositórios sozinho e já deixa tudo funcionando.</p>
-  <ol class="steps">
-    <li><strong>Extraia o pacote</strong>: Baixe o <code>sankhya-repo-updater-template.zip</code> <a href="https://drive.google.com/drive/folders/1eLTy76RPVhwBDwewOYfTvcU7Ci5V57yb?usp=drive_link">no Drive</a> e descompacte em qualquer pasta (não precisa ser dentro da pasta dos projetos).</li>
-    <li><strong>Dê 2 cliques em <code>Instalar-Automatico.bat</code></strong>. Uma janela preta de console abre, mostra o progresso, e ao final aparece uma caixa de mensagem com o resultado. Aperte qualquer tecla pra fechar o console quando terminar. O script procura pastas com repositório git cujo remoto aponte para <code>gitlab.sankhya.com.br</code>. Pode levar 1–2 minutos na primeira vez.</li>
-    <li><strong>Confira o resumo</strong>: Uma janela mostra quais repositórios foram encontrados e configurados, o horário da checagem diária e o nome do atalho criado na área de trabalho.</li>
-  </ol>
+  <h2>Antes de come&ccedil;ar</h2>
+  <div class="card">
+    <ul class="checklist">
+      <li><span><strong>Git</strong> instalado (o mesmo que voc&ecirc; j&aacute; usa para clonar os projetos).</span></li>
+      <li><span>Sua conta do <strong>GitHub com acesso &agrave; organiza&ccedil;&atilde;o <code>sankhya-tech</code></strong> &mdash; os m&oacute;dulos de l&aacute; s&atilde;o privados.</span></li>
+      <li><span><strong>VPN FortiClient</strong> configurada, para os m&oacute;dulos do GitLab. Para ela conectar sozinha, deixe o FortiClient <strong>fixado na barra de tarefas</strong> (bot&atilde;o direito no &iacute;cone &rarr; <em>Fixar na barra de tarefas</em>).</span></li>
+    </ul>
+  </div>
+  <p class="muted">N&atilde;o precisa ter os projetos clonados: o que faltar, ele clona sozinho.</p>
+
+  <h2>Instala&ccedil;&atilde;o</h2>
+
+  <div class="step" id="passo-1">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h3>Baixe e extraia numa pasta fixa</h3>
+      <p><a href="Sankhya-Repo-Updater.zip" download>Baixe o .zip</a>, clique nele com o bot&atilde;o direito &rarr; <strong>Extrair tudo...</strong> &rarr; e use esta pasta como destino:</p>
+      <div class="copy-row">
+        <code id="dest">C:\SK-Code\Sankhya-Repo-Updater</code>
+        <button class="copy-btn" type="button" data-copy="dest">Copiar</button>
+      </div>
+      <div class="warn"><b>Importante:</b> n&atilde;o abra o arquivo de dentro do .zip e n&atilde;o mova a pasta depois. A atualiza&ccedil;&atilde;o di&aacute;ria fica apontando para o lugar onde o arquivo estava quando voc&ecirc; instalou. (Se precisar mover, &eacute; s&oacute; abrir de novo e clicar em <em>Salvar e instalar</em>.)</div>
+    </div>
+    <div class="step-line"></div>
+  </div>
+
+  <div class="step" id="passo-2">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>D&ecirc; 2 cliques em <code>Sankhya-Repo-Updater.bat</code></h3>
+      <p>Abre a janela de configura&ccedil;&atilde;o, que j&aacute; procura sozinha os m&oacute;dulos na pasta <code>C:\SK-Code</code>.</p>
+      <div class="tip"><b>O Windows pode perguntar se confia no arquivo</b>, porque ele veio da internet:
+        <br>&bull; &ldquo;Aviso de seguran&ccedil;a &mdash; O fornecedor n&atilde;o p&ocirc;de ser verificado&rdquo; &rarr; clique em <strong>Executar</strong>.
+        <br>&bull; Tela azul &ldquo;O Windows protegeu o computador&rdquo; &rarr; <strong>Mais informa&ccedil;&otilde;es</strong> &rarr; <strong>Executar assim mesmo</strong>.
+        <br>Isso s&oacute; aparece na primeira vez.</div>
+    </div>
+    <div class="step-line"></div>
+  </div>
+
+  <div class="step" id="passo-3">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>Confira os m&oacute;dulos marcados</h3>
+      <p>Na maioria das vezes n&atilde;o precisa mexer em nada. A janela &eacute; assim:</p>
+
+      <div class="win" role="img" aria-label="Reprodu&ccedil;&atilde;o da janela de configura&ccedil;&atilde;o do Sankhya Repo Updater">
+        <div class="win-title"><span>Sankhya Repo Updater</span><span>&ndash; &#9633; &times;</span></div>
+        <div class="win-body">
+          <div>Marque os m&oacute;dulos que devem ser mantidos atualizados. Os que ainda n&atilde;o existem na pasta ser&atilde;o clonados.</div>
+          <div class="win-row">Pasta dos projetos: <span class="win-input">C:\SK-Code</span><span class="win-btn">Escolher...</span><span class="win-btn">Procurar</span><span class="pin">A</span></div>
+          <div class="win-scroll">
+            <table class="win-grid">
+              <thead><tr><th>Atualizar <span class="pin">B</span></th><th>M&oacute;dulo</th><th>Servidor</th><th>Situa&ccedil;&atilde;o <span class="pin">C</span></th></tr></thead>
+              <tbody>
+                <tr><td>&#9745;</td><td>sankhyaw</td><td>GitLab</td><td class="s-ok">ok</td></tr>
+                <tr><td>&#9745;</td><td>coletorwms</td><td>GitLab</td><td class="s-ok">ok</td></tr>
+                <tr><td>&#9745;</td><td>erpcore-module</td><td>GitHub</td><td class="s-swap">origin ser&aacute; trocado para o GitHub</td></tr>
+                <tr><td>&#9745;</td><td>mgeliv-module</td><td>GitHub</td><td class="s-ok">ok</td></tr>
+                <tr><td>&#9745;</td><td>mgeprod-module</td><td>GitHub</td><td class="s-clone">ser&aacute; clonado</td></tr>
+                <tr><td>&#9744;</td><td>mgeimobilizado-module</td><td>GitHub</td><td class="s-clone">ser&aacute; clonado</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="win-row"><span class="win-btn">Adicionar m&oacute;dulo por URL...</span><span class="win-btn">Procurar no computador todo</span></div>
+          <div class="win-row">&#9745; Conectar a VPN (FortiClient) automaticamente <span class="pin">D</span></div>
+          <div class="win-row">Verificar todo dia &agrave;s: <span class="win-input" style="flex:0 0 56px">11:00</span> &nbsp; Altera&ccedil;&otilde;es locais n&atilde;o commitadas: <span class="win-input" style="flex:0 0 auto">Guardar em stash antes de atualizar (recomendado)</span></div>
+          <div class="win-foot">
+            <span class="win-status">N&atilde;o instalado (sem verifica&ccedil;&atilde;o di&aacute;ria).</span>
+            <span class="win-row" style="margin:0"><span class="win-btn">Logs</span><span class="win-btn">Desinstalar</span><span class="win-btn">Atualizar agora</span><span class="win-btn primary">Salvar e instalar</span><span class="pin">E</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="win-legend">
+        <span class="pin">A</span><span>Pasta onde ficam seus projetos. S&oacute; troque se n&atilde;o for <code>C:\SK-Code</code> &mdash; depois clique em <em>Procurar</em>.</span>
+        <span class="pin">B</span><span>Marcado = ser&aacute; mantido atualizado. Desmarque o que voc&ecirc; n&atilde;o usa.</span>
+        <span class="pin">C</span><span>O que vai acontecer com cada m&oacute;dulo (veja a tabela abaixo).</span>
+        <span class="pin">D</span><span>J&aacute; vem ligado: se a VPN estiver ca&iacute;da, ele conecta sozinho antes de atualizar.</span>
+        <span class="pin">E</span><span>Grava tudo e instala. &Eacute; o pr&oacute;ximo passo.</span>
+      </div>
+
+      <table class="t">
+        <thead><tr><th>Situa&ccedil;&atilde;o</th><th>O que significa</th></tr></thead>
+        <tbody>
+          <tr><td class="s-ok" style="color:var(--accent)">ok</td><td>J&aacute; est&aacute; no computador e no servidor certo. S&oacute; vai receber as atualiza&ccedil;&otilde;es.</td></tr>
+          <tr><td style="color:var(--warn)">ser&aacute; clonado</td><td>Ainda n&atilde;o existe na sua pasta. Se ficar marcado, ele baixa o projeto inteiro na pr&oacute;xima atualiza&ccedil;&atilde;o.</td></tr>
+          <tr><td style="color:#60a5fa">origin ser&aacute; trocado</td><td>O m&oacute;dulo migrou do GitLab para o GitHub. Ele passa a buscar no lugar novo &mdash; seus branches e arquivos continuam como est&atilde;o.</td></tr>
+          <tr><td style="color:#f87171">ERRO: pasta existe e n&atilde;o &eacute; reposit&oacute;rio git</td><td>J&aacute; existe uma pasta com esse nome que n&atilde;o &eacute; um clone. Renomeie ou apague a pasta e clique em <em>Procurar</em>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="step-line"></div>
+  </div>
+
+  <div class="step" id="passo-4">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h3>Clique em <strong>Salvar e instalar</strong></h3>
+      <p>Ele grava a configura&ccedil;&atilde;o, cria a atualiza&ccedil;&atilde;o di&aacute;ria e o atalho <strong>Atualizar modulos Sankhya</strong> na &aacute;rea de trabalho. Em seguida pergunta se voc&ecirc; quer atualizar agora &mdash; responda <strong>Sim</strong>.</p>
+      <p>Na primeira vez, o navegador abre pedindo para <strong>entrar no GitHub</strong>. Fa&ccedil;a o login com sua conta da Sankhya e autorize. Isso fica salvo, n&atilde;o pede de novo.</p>
+      <div class="tip"><b>Pronto quando:</b> o rodap&eacute; da janela mostra <em>&ldquo;Instalado: verifica&ccedil;&atilde;o di&aacute;ria &agrave;s 11:00.&rdquo;</em> e aparece a mensagem <em>Resultado da atualiza&ccedil;&atilde;o</em> com o que foi feito.</div>
+    </div>
+    <div class="step-line"></div>
+  </div>
 
   <h2>No dia a dia</h2>
-  <p>Todo dia, no horário padrão das 11h, a automação atualiza os projetos sozinha. Se a VPN não estiver conectada nesse momento, a automação faz a conexão primeiro e, em seguida, segue com a atualização normalmente.</p>
-  <p>Se por algum motivo a automação for interrompida e não conseguir concluir o processo, dá pra rodar na mão pelo atalho <strong>Atualizar Módulos</strong> da área de trabalho — o clique manual nele inicia o mesmo processo padrão.</p>
+  <div class="card">
+    <ul class="checklist">
+      <li><span><strong>Todo dia &agrave;s 11h</strong> ele atualiza tudo escondido, sem abrir janela. Se o computador estiver desligado nesse hor&aacute;rio, roda assim que voc&ecirc; ligar.</span></li>
+      <li><span>S&oacute; aparece um <strong>aviso no canto da tela</strong> quando algum m&oacute;dulo foi atualizado ou deu erro.</span></li>
+      <li><span>Quer atualizar na hora? Use o atalho <strong>Atualizar modulos Sankhya</strong> na &aacute;rea de trabalho.</span></li>
+      <li><span>Seu trabalho n&atilde;o commitado nunca &eacute; perdido: se houver algo para baixar, ele guarda suas altera&ccedil;&otilde;es no <em>stash</em> antes (recupere com <code>git stash pop</code>).</span></li>
+    </ul>
+  </div>
+  <p><strong>Quer mudar algo?</strong> (incluir ou tirar m&oacute;dulo, hor&aacute;rio, VPN) &mdash; abra o <code>Sankhya-Repo-Updater.bat</code> de novo, ajuste e clique em <em>Salvar e instalar</em>.</p>
 
-  <h2>VPN automática (opcional)</h2>
-  <p>Por padrão, se a VPN cair, o pacote só abre o FortiClient e espera você clicar em "Conectar". Ative <code>"vpnAutoConnect": true</code> no <code>config.json</code> pra ele clicar sozinho (opcional, vem desligado).</p>
-  <p>Com isso ligado, o pacote conecta a VPN sozinho sempre que ela cair — no atalho manual e na tarefa agendada.</p>
-  <p>Ele só faz isso se:</p>
-  <ul class="plain">
-    <li>FortiClient fixado na barra de tarefas</li>
-    <li>Sessão SSO já autenticada no navegador</li>
-  </ul>
-  <p>Faltando um dos dois, tudo volta ao normal: abre a janela e avisa, sem quebrar nada.</p>
+  <h2 id="migrar">J&aacute; usava a vers&atilde;o antiga?</h2>
+  <p>Aquela do <code>Instalar-Automatico.bat</code>. Basta seguir os 4 passos acima: ao clicar em <em>Salvar e instalar</em>, a atualiza&ccedil;&atilde;o di&aacute;ria antiga &eacute; substitu&iacute;da pela nova. Se o rodap&eacute; mostrar <em>&ldquo;H&aacute; uma verifica&ccedil;&atilde;o di&aacute;ria de OUTRA vers&atilde;o instalada&rdquo;</em>, &eacute; exatamente isso &mdash; clique em <em>Salvar e instalar</em>.</p>
+  <p class="muted">Depois disso, a pasta da vers&atilde;o antiga pode ser apagada.</p>
+
+  <h2>Deu algum problema?</h2>
+
+  <details>
+    <summary>Apareceu &ldquo;sem acesso a https://github.com/...&rdquo;</summary>
+    <div>
+      <p>Falta o login no GitHub ou sua conta n&atilde;o tem acesso &agrave; organiza&ccedil;&atilde;o <code>sankhya-tech</code>. Rode o atalho <strong>Atualizar modulos Sankhya</strong> uma vez e fa&ccedil;a o login quando o navegador abrir. Se continuar, pe&ccedil;a acesso &agrave; organiza&ccedil;&atilde;o.</p>
+      <p class="muted">A atualiza&ccedil;&atilde;o autom&aacute;tica das 11h nunca abre login &mdash; por isso o primeiro login tem que ser pelo atalho ou pelo bot&atilde;o <em>Atualizar agora</em>.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Os m&oacute;dulos do GitLab n&atilde;o atualizaram (VPN)</summary>
+    <div>
+      <p>Os m&oacute;dulos do GitLab precisam da VPN. Quando ela est&aacute; ca&iacute;da, s&oacute; eles ficam de fora naquele dia &mdash; os do GitHub atualizam normalmente.</p>
+      <p>Para a VPN conectar sozinha: deixe marcado <em>Conectar a VPN automaticamente</em>, o FortiClient fixado na barra de tarefas e o login do Google (SSO) j&aacute; feito pelo menos uma vez. Se faltar algo, ele s&oacute; abre o FortiClient e avisa.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>&ldquo;git pull --ff-only falhou (prov&aacute;vel diverg&ecirc;ncia)&rdquo;</summary>
+    <div><p>Voc&ecirc; tem commits locais nesse branch que n&atilde;o est&atilde;o no servidor. Ele n&atilde;o faz merge sozinho para n&atilde;o bagun&ccedil;ar seu trabalho &mdash; resolva nesse reposit&oacute;rio com <code>git pull</code> ou <code>git rebase</code>.</p></div>
+  </details>
+
+  <details>
+    <summary>&ldquo;Filename too long&rdquo;</summary>
+    <div>
+      <p>Habilite caminhos longos no Windows: abra o <strong>PowerShell como Administrador</strong> e rode:</p>
+      <p><code>New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name LongPathsEnabled -Value 1 -PropertyType DWord -Force</code></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Um m&oacute;dulo meu n&atilde;o apareceu na lista</summary>
+    <div><p>Se ele est&aacute; fora de <code>C:\SK-Code</code>, clique em <strong>Procurar no computador todo</strong> (leva 1&ndash;2 minutos). Se ainda n&atilde;o est&aacute; clonado e n&atilde;o aparece, use <strong>Adicionar m&oacute;dulo por URL...</strong> e cole o endere&ccedil;o do reposit&oacute;rio.</p></div>
+  </details>
+
+  <details>
+    <summary>Onde vejo o que aconteceu?</summary>
+    <div><p>Bot&atilde;o <strong>Logs</strong> na janela. Os arquivos ficam em <code>%LOCALAPPDATA%\SankhyaRepoUpdater\logs</code>, um por m&ecirc;s.</p></div>
+  </details>
 
   <h2>Desinstalar</h2>
-  <p>Dê 2 cliques em <code>uninstall.bat</code>. Remove a tarefa agendada e o atalho da área de trabalho (os logs ficam, se quiser apagar é manual).</p>
-
-  <h2>Pacote: sankhya-repo-updater-template</h2>
-  <table>
-    <thead><tr><th>Arquivo</th><th>Função</th></tr></thead>
-    <tbody>
-      <tr><td><code>Instalar-Automatico.bat</code></td><td>instalador sem configuração manual — descobre os repositórios sozinho</td></tr>
-      <tr><td><code>install.bat</code></td><td>instalador manual — usa o <code>config.json</code> preenchido à mão</td></tr>
-      <tr><td><code>uninstall.bat</code></td><td>remove a tarefa agendada e o atalho</td></tr>
-      <tr><td><code>config.json</code></td><td>configuração (gerada sozinha pelo instalador automático, ou editada à mão)</td></tr>
-      <tr><td><code>Atualizar-Agora.bat</code></td><td>o que o atalho da área de trabalho executa (verificação manual, com janela de resultado)</td></tr>
-      <tr><td><code>update-sankhya-modules.bat</code></td><td>o que a tarefa agendada executa sozinha, 1x por dia — não precisa clicar nele</td></tr>
-      <tr><td><code>logs\</code></td><td>histórico de cada execução</td></tr>
-    </tbody>
-  </table>
+  <p>Abra o <code>Sankhya-Repo-Updater.bat</code> e clique em <strong>Desinstalar</strong>. Remove a atualiza&ccedil;&atilde;o di&aacute;ria e o atalho. Seus projetos n&atilde;o s&atilde;o tocados. Depois pode apagar a pasta do arquivo.</p>
 
   <hr>
-  <p class="footer">sankhya-repo-updater-template · git fetch · git pull --ff-only · sem surpresas</p>
+  <p class="footer">Sankhya Repo Updater &middot; GitLab + GitHub &middot; git fetch &middot; git pull --ff-only &middot; sem surpresas</p>
 
 </div>
+<script>
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = document.getElementById(btn.dataset.copy).textContent;
+      var done = function () { btn.textContent = 'Copiado!'; setTimeout(function () { btn.textContent = 'Copiar'; }, 1500); };
+      if (navigator.clipboard) { navigator.clipboard.writeText(text).then(done, function () {}); }
+    });
+  });
+</script>
 </body>
 </html>

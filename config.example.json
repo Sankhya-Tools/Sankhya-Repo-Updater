@@ -1,11 +1,12 @@
 {
-  "reposRoot": "",
-  "repoNames": [],
-  "repoPaths": [],
-  "gitHost": "gitlab.sankhya.com.br",
-  "taskName": "Sankhya-UpdateModules",
+  "reposRoot": "C:\\SK-Code",
+  "vpnAutoConnect": true,
   "scheduleTime": "11:00",
   "discardMode": "stash",
+  "taskName": "Sankhya-UpdateModules",
   "shortcutName": "Atualizar modulos Sankhya",
-  "vpnAutoConnect": false
+  "repos": [
+    { "path": "C:\\SK-Code\\sankhyaw",       "url": "https://gitlab.sankhya.com.br/erp/sankhyaw.git" },
+    { "path": "C:\\SK-Code\\erpcore-module", "url": "https://github.com/sankhya-tech/erpcore-module.git" }
+  ]
 }
